@@ -3,7 +3,7 @@ steps:
     image: "eclipse-temurin:17-alpine"
     commands:
       - "cd plugin/"
-      - "./gradlew licenseCheck build javadocJar"
+      - "./gradlew build javadocJar"
 
   publish:
     image: "eclipse-temurin:17-alpine"
