@@ -1,6 +1,7 @@
 package xyz.kyngs.mcupload.plugin.extension;
 
 import org.gradle.api.Action;
+import xyz.kyngs.mcupload.plugin.extension.platforms.GithubPlatform;
 import xyz.kyngs.mcupload.plugin.extension.platforms.ModrinthPlatform;
 import xyz.kyngs.mcupload.plugin.extension.platforms.PolymartPlatform;
 
@@ -38,5 +39,16 @@ public class PlatformHandler {
         var polymart = new PolymartPlatform();
         action.execute(polymart);
         platforms.add(polymart);
+    }
+
+    /**
+     * Adds the GitHub platform.
+     *
+     * @param action The action to execute.
+     */
+    public void github(Action<GithubPlatform> action) {
+        var github = new GithubPlatform();
+        action.execute(github);
+        platforms.add(github);
     }
 }
