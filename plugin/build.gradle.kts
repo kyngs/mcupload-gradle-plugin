@@ -55,3 +55,4 @@ publishing {
 }
 
 version = "0.1.0"
+group = "xyz.kyngs.mcupload"
