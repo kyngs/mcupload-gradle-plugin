@@ -63,7 +63,7 @@ public class PolymartPlatform implements Platform {
         if (parsedResponse.get("success").getAsBoolean()) {
             task.getLogger().lifecycle("Uploaded version " + datasource.getVersion(project) + " to Polymart.");
         } else {
-            throw new RuntimeException("Failed to upload to Polymart: " + parsedResponse.get("message").getAsString());
+            throw new RuntimeException("Failed to upload to Polymart: " + rawResponse.body());
         }
 
     }

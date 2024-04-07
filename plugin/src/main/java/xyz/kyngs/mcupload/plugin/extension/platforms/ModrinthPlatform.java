@@ -91,6 +91,9 @@ public class ModrinthPlatform implements Platform {
         if (loaders.isEmpty()) {
             throw new GradleException("No loaders specified!");
         }
+        if (dependencies == null) {
+            dependencies = new DependencyHandler();
+        }
 
         var api = api(project);
 
