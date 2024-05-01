@@ -34,7 +34,7 @@ gradlePlugin {
         create("xyz.kyngs.mcupload.plugin") {
             id = "xyz.kyngs.mcupload.plugin"
             implementationClass = "xyz.kyngs.mcupload.plugin.MCUploadGradlePlugin"
-            version = "0.1.0"
+            version = project.version
         }
     }
 }
@@ -54,5 +54,5 @@ publishing {
     }
 }
 
-version = "0.2.2"
+version = "0.2.3"
 group = "xyz.kyngs.mcupload"

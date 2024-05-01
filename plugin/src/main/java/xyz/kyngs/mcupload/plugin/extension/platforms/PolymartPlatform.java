@@ -46,7 +46,7 @@ public class PolymartPlatform implements Platform {
 
         var request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.polymart.org/v1/postUpdate"))
-                .header("Content-Type", "application/multipart-form-data")
+                .header("Content-Type", "multipart/form-data")
                 .header("enctype", "multipart/form-data")
                 .POST(data);
 
