@@ -2,19 +2,22 @@ package xyz.kyngs.mcupload.plugin.extension.platforms;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.StringBody;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.gradle.api.Project;
 import xyz.kyngs.mcupload.plugin.MCReadmeSyncTask;
 import xyz.kyngs.mcupload.plugin.MCReleaseTask;
 import xyz.kyngs.mcupload.plugin.extension.Datasource;
 import xyz.kyngs.mcupload.plugin.extension.MCUploadExtension;
 import xyz.kyngs.mcupload.plugin.extension.Platform;
-import xyz.kyngs.mcupload.plugin.util.MultiPartBodyPublisher;
 
 import java.io.File;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.Objects;
 
 public class PolymartPlatform implements Platform {
@@ -28,43 +31,48 @@ public class PolymartPlatform implements Platform {
      */
     public String resourceId;
 
+    private static StringBody multipartString(String value) {
+        return new StringBody(value, ContentType.MULTIPART_FORM_DATA);
+    }
+
     @Override
     public void upload(MCUploadExtension extension, MCReleaseTask task, Datasource datasource, Project project, File file) throws Exception {
         Objects.requireNonNull(apiKey, "API key cannot be null!");
         Objects.requireNonNull(resourceId, "Resource id cannot be null!");
 
-        var client = HttpClient.newHttpClient();
+        var data = MultipartEntityBuilder.create()
+                .setMode(HttpMultipartMode.LEGACY)
+                .addPart("resource_id", multipartString(resourceId))
+                .addPart("version", multipartString(datasource.getVersion(project)))
+                .addPart("title", multipartString(datasource.getVersionName()))
+                .addPart("message", multipartString(datasource.getChangelog()))
+                .addPart("api_key", multipartString(apiKey))
+                .addPart("file", new FileBody(file));
 
-        var data = new MultiPartBodyPublisher()
-                .addPart("resource_id", resourceId)
-                .addPart("version", datasource.getVersion(project))
-                .addPart("title", datasource.getVersionName())
-                .addPart("message", datasource.getChangelog())
-                .addPart("api_key", apiKey)
-                .addPart("file", file.toPath())
-                .build();
+        var post = new HttpPost("https://api.polymart.org/v1/postUpdate");
 
-        var request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.polymart.org/v1/postUpdate"))
-                .header("Content-Type", "multipart/form-data")
-                .header("enctype", "multipart/form-data")
-                .POST(data);
+        post.setHeader("enctype", "multipart/form-data");
+        post.setEntity(data.build());
 
-        var rawResponse = client.send(request.build(), HttpResponse.BodyHandlers.ofString());
-        var gson = new Gson();
+        try (var client = HttpClients.createDefault()) {
+            try (var res = client.execute(post)) {
+                var gson = new Gson();
+                var string = EntityUtils.toString(res.getEntity());
 
-        var response = gson.fromJson(rawResponse.body(), JsonObject.class);
+                var response = gson.fromJson(string, JsonObject.class);
 
-        if (rawResponse.statusCode() != 200) {
-            throw new RuntimeException("Failed to upload to Polymart: " + response.get("message").getAsString());
-        }
+                if (res.getCode() != 200) {
+                    throw new RuntimeException("Failed to upload to Polymart: " + response.get("message").getAsString());
+                }
 
-        var parsedResponse = response.getAsJsonObject("response");
+                var parsedResponse = response.getAsJsonObject("response");
 
-        if (parsedResponse.get("success").getAsBoolean()) {
-            task.getLogger().lifecycle("Uploaded version " + datasource.getVersion(project) + " to Polymart.");
-        } else {
-            throw new RuntimeException("Failed to upload to Polymart: " + rawResponse.body());
+                if (parsedResponse.get("success").getAsBoolean()) {
+                    task.getLogger().lifecycle("Uploaded version " + datasource.getVersion(project) + " to Polymart.");
+                } else {
+                    throw new RuntimeException("Failed to upload to Polymart: " + string);
+                }
+            }
         }
 
     }
