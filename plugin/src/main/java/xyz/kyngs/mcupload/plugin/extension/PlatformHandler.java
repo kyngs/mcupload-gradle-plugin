@@ -1,6 +1,7 @@
 package xyz.kyngs.mcupload.plugin.extension;
 
 import org.gradle.api.Action;
+import xyz.kyngs.mcupload.plugin.extension.platforms.DiscordPlatform;
 import xyz.kyngs.mcupload.plugin.extension.platforms.GithubPlatform;
 import xyz.kyngs.mcupload.plugin.extension.platforms.ModrinthPlatform;
 import xyz.kyngs.mcupload.plugin.extension.platforms.PolymartPlatform;
@@ -50,5 +51,15 @@ public class PlatformHandler {
         var github = new GithubPlatform();
         action.execute(github);
         platforms.add(github);
+    }
+
+    /**
+     * Adds the Discord platform.
+     * @param action The action to execute.
+     */
+    public void discord(Action<DiscordPlatform> action) {
+        var discord = new DiscordPlatform();
+        action.execute(discord);
+        platforms.add(discord);
     }
 }

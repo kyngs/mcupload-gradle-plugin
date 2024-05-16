@@ -28,6 +28,7 @@ dependencies {
     implementation("dev.masecla:Modrinth4J:2.0.0")
     implementation("org.kohsuke:github-api:1.321")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1")
+    implementation("club.minnced:discord-webhooks:0.8.4")
 }
 
 gradlePlugin {
@@ -55,5 +56,5 @@ publishing {
     }
 }
 
-version = "0.2.4"
+version = "0.3.0"
 group = "xyz.kyngs.mcupload"
