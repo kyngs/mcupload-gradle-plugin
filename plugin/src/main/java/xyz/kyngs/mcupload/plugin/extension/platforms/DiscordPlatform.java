@@ -6,6 +6,7 @@ import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 import xyz.kyngs.mcupload.plugin.MCReadmeSyncTask;
 import xyz.kyngs.mcupload.plugin.MCReleaseTask;
@@ -23,14 +24,21 @@ public class DiscordPlatform implements Platform {
      */
     public String webhookUrl;
 
+    private Action<WebhookEmbedBuilder> embedAction;
+
     @Override
     public void upload(MCUploadExtension extension, MCReleaseTask task, Datasource datasource, Project project, File file) throws Exception {
         Objects.requireNonNull(webhookUrl, "Webhook URL cannot be null!");
 
-        var embed = new WebhookEmbedBuilder()
+        var embedBuilder = new WebhookEmbedBuilder()
                 .setTitle(new WebhookEmbed.EmbedTitle(datasource.getVersionName(), null))
-                .setDescription(datasource.getChangelog())
-                .build();
+                .setDescription(datasource.getChangelog());
+
+        if (embedAction != null) {
+            embedAction.execute(embedBuilder);
+        }
+
+        var embed = embedBuilder.build();
 
         var message = new WebhookMessageBuilder()
                 .addFile(file)
@@ -40,6 +48,10 @@ public class DiscordPlatform implements Platform {
         try (var client = WebhookClient.withUrl(webhookUrl)) {
             client.send(message);
         }
+    }
+
+    public void configureEmbed(Action<WebhookEmbedBuilder> action) {
+        this.embedAction = action;
     }
 
     @Override

@@ -56,5 +56,5 @@ publishing {
     }
 }
 
-version = "0.3.0"
+version = "0.3.1"
 group = "xyz.kyngs.mcupload"
