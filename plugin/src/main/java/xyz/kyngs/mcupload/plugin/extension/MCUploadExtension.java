@@ -51,7 +51,7 @@ public class MCUploadExtension {
      * @param action The action to execute.
      */
     public void datasource(Action<DatasourceHandler> action) {
-        datasourceHandler = new DatasourceHandler();
+        datasourceHandler = new DatasourceHandler(project);
         action.execute(datasourceHandler);
     }
 
