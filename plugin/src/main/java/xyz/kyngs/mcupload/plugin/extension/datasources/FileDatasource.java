@@ -85,7 +85,7 @@ public class FileDatasource implements Datasource {
         var file = new File(path);
 
         if (!file.exists()) {
-            throw new IllegalArgumentException(name + " file does not exist!");
+            throw new IllegalArgumentException(name + " file does not exist! Searched path: " + file.getAbsolutePath());
         }
 
         if (!file.isFile()) {
