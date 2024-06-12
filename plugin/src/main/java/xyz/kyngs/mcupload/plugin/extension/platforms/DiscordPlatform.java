@@ -46,7 +46,8 @@ public class DiscordPlatform implements Platform {
                 .build();
 
         try (var client = WebhookClient.withUrl(webhookUrl)) {
-            client.send(message);
+            var result = client.send(message).get();
+            project.getLogger().lifecycle("Discord message sent with ID: " + result.getId());
         }
     }
 
